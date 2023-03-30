@@ -1,10 +1,10 @@
 package types
 
 type MQTTConfig interface {
-	ClientId() string
-	Endpoint() string
-	Username() string
-	Password() string
-	ProducerTopic() *string
-	ConsumerTopic() *string
+	GetClientId() string
+	GetEndpoint() string
+	GetUsername() string
+	GetPassword() string
+	GetProducerTopic() *string
+	GetConsumerTopic() *string
 }
