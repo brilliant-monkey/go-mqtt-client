@@ -28,16 +28,16 @@ func setupClient(mqttClient *MQTTClient) {
 
 	clientId, exists := os.LookupEnv("POD_NAME")
 	if !exists {
-		clientId = mqttClient.config.ClientId()
+		clientId = mqttClient.config.GetClientId()
 
 		log.Printf("Failed to get POD_NAME. Using local client id %s.", clientId)
 	}
 
 	opts := MQTT.NewClientOptions()
-	opts.AddBroker(mqttClient.config.Endpoint())
+	opts.AddBroker(mqttClient.config.GetEndpoint())
 	opts.SetClientID(clientId)
-	opts.SetUsername(mqttClient.config.Username())
-	opts.SetPassword(mqttClient.config.Password())
+	opts.SetUsername(mqttClient.config.GetUsername())
+	opts.SetPassword(mqttClient.config.GetPassword())
 	opts.SetAutoReconnect(true)
 
 	opts.OnConnectionLost = func(client MQTT.Client, err error) {
@@ -58,15 +58,15 @@ func setupClient(mqttClient *MQTTClient) {
 		}
 	}
 
-	if mqttClient.config.ProducerTopic() == nil {
+	if mqttClient.config.GetProducerTopic() == nil {
 		log.Println("MQTT producer config not set.")
 	}
 
-	if mqttClient.config.ConsumerTopic() == nil {
+	if mqttClient.config.GetConsumerTopic() == nil {
 		log.Println("MQTT consumer config not set.")
 	}
 
-	log.Printf("Connecting to MQTT broker at %s...", mqttClient.config.Endpoint())
+	log.Printf("Connecting to MQTT broker at %s...", mqttClient.config.GetEndpoint())
 	connection := MQTT.NewClient(opts)
 	mqttClient.connection = connection
 }
@@ -81,19 +81,19 @@ func (client *MQTTClient) Connect() error {
 
 func (client *MQTTClient) Close() (err error) {
 	log.Print("Closing MQTT connection...")
-	client.connection.Unsubscribe(*client.config.ConsumerTopic())
+	client.connection.Unsubscribe(*client.config.GetConsumerTopic())
 	client.connection.Disconnect(uint(10 / time.Millisecond))
 	log.Print("MQTT connection closed.")
 	return
 }
 
 func (client *MQTTClient) subscribe(handler func(message []byte)) {
-	log.Printf("Subscribing to topic %s...", *client.config.ConsumerTopic())
+	log.Printf("Subscribing to topic %s...", *client.config.GetConsumerTopic())
 	h := func(client MQTT.Client, message MQTT.Message) {
 		handler(message.Payload())
 	}
 
-	if token := client.connection.Subscribe(*client.config.ConsumerTopic(), 1, h); token.Wait() && token.Error() != nil {
+	if token := client.connection.Subscribe(*client.config.GetConsumerTopic(), 1, h); token.Wait() && token.Error() != nil {
 		log.Println(token)
 	}
 	log.Printf("Subscribed. Waiting for messages...")
