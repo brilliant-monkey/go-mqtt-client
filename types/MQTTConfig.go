@@ -7,4 +7,5 @@ type MQTTConfig interface {
 	GetPassword() string
 	GetProducerTopic() *string
 	GetConsumerTopic() *string
+	GetConsumerQOS() int
 }

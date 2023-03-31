@@ -93,7 +93,8 @@ func (client *MQTTClient) subscribe(handler func(message []byte)) {
 		handler(message.Payload())
 	}
 
-	if token := client.connection.Subscribe(*client.config.GetConsumerTopic(), 1, h); token.Wait() && token.Error() != nil {
+	qos := client.config.GetConsumerQOS()
+	if token := client.connection.Subscribe(*client.config.GetConsumerTopic(), byte(qos), h); token.Wait() && token.Error() != nil {
 		log.Println(token)
 	}
 	log.Printf("Subscribed. Waiting for messages...")
