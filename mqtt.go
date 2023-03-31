@@ -104,3 +104,12 @@ func (client *MQTTClient) Subscribe(handler func(message []byte)) {
 	client.handler = &handler
 	client.subscribe(handler)
 }
+
+func (client *MQTTClient) Produce(message []byte) (err error) {
+	topic := *client.config.GetProducerTopic()
+	const qos = 1
+
+	token := client.connection.Publish(topic, qos, true, message)
+	err = token.Error()
+	return
+}
