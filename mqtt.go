@@ -110,6 +110,7 @@ func (client *MQTTClient) Produce(message []byte) (err error) {
 	const qos = 1
 
 	token := client.connection.Publish(topic, qos, true, message)
+	token.Wait()
 	err = token.Error()
 	return
 }
